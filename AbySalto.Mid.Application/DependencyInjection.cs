@@ -1,11 +1,13 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-namespace AbySalto.Mid.Application
+﻿using AbySalto.Mid.Application.Products;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace AbySalto.Mid.Application;
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+    public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        public static IServiceCollection AddApplication(this IServiceCollection services)
-        {
-            return services;
-        }
+        services.AddScoped<ProductQueries>();
+        return services;
     }
 }

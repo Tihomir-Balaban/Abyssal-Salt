@@ -5,8 +5,21 @@ namespace AbySalto.Mid.Application.Services;
 
 public sealed class BasketService(IBasketRepository baskets)
 {
-    public Task<Domain.Entities.Basket> CreateAsync(CancellationToken cancellationToken)
-        => baskets.CreateAsync(cancellationToken);
+    public async Task<Domain.Entities.Basket> CreateAsync(Guid? userId, CancellationToken cancellationToken)
+    {
+        var basket = new Domain.Entities.Basket
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            CreatedAtUtc = DateTime.UtcNow
+        };
+
+        await baskets.AddAsync(basket, cancellationToken);
+        await baskets.SaveChangesAsync(cancellationToken);
+
+        return basket;
+    }
+
 
     public Task<Domain.Entities.Basket?> GetAsync(Guid basketId, CancellationToken cancellationToken)
         => baskets.GetByIdAsync(basketId, cancellationToken);

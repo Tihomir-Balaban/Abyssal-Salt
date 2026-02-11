@@ -1,18 +1,27 @@
-﻿using AbySalto.Mid.Application.Basket;
+﻿using System.Security.Claims;
+using AbySalto.Mid.Application.Basket;
 using AbySalto.Mid.Application.Common;
 using AbySalto.Mid.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Abysalto.Mid.Controller;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public sealed class BasketController(BasketService service) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(CancellationToken cancellationToken)
     {
-        var basket = await service.CreateAsync(cancellationToken);
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = string.IsNullOrWhiteSpace(userIdValue) ? (Guid?)null : Guid.Parse(userIdValue);
+
+        var basket = await service.CreateAsync(userId, cancellationToken);
+        
         return Ok(new { basket.Id });
     }
 

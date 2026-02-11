@@ -1,9 +1,10 @@
 ﻿using AbySalto.Mid.Application.Common;
 using AbySalto.Mid.Application.Contracts;
+using AbySalto.Mid.Application.Products;
 using AbySalto.Mid.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace AbySalto.Mid.Application.Products;
+namespace AbySalto.Mid.Application.Requests.Products;
 
 public sealed class ProductQueries(IProductRepository repository)
 {

@@ -1,4 +1,4 @@
-﻿namespace AbySalto.Mid.Application.Products;
+﻿namespace AbySalto.Mid.Application.Requests.Products;
 
 public sealed class GetProductsRequest
 {

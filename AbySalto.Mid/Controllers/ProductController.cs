@@ -1,4 +1,5 @@
 ﻿using AbySalto.Mid.Application.Products;
+using AbySalto.Mid.Application.Requests.Products;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Abysalto.Mid.Controller;

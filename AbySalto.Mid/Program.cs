@@ -1,6 +1,8 @@
-
 using AbySalto.Mid.Application;
 using AbySalto.Mid.Infrastructure;
+using AbySalto.Mid.Domain.Entities;
+using AbySalto.Mid.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace AbySalto.Mid
 {
@@ -34,7 +36,6 @@ namespace AbySalto.Mid
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

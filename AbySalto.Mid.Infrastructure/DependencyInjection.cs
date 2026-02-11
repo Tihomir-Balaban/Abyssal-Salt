@@ -1,12 +1,23 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using AbySalto.Mid.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AbySalto.Mid.Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructur(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                                   ?? throw new InvalidOperationException("Connection string 'Default' not found.");
+
+            if (connectionString == null) 
+                throw new ArgumentNullException(nameof(connectionString));
+
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(connectionString));
+
             return services;
         }
 

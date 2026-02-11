@@ -9,6 +9,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+    <ProjectReference Include="..\AbySalto.Mid.Application\AbySalto.Mid.Application.csproj" />
+    <ProjectReference Include="..\AbySalto.Mid.Infrastructure\AbySalto.Mid.Infrastructure.csproj" />
+    <ProjectReference Include="..\AbySalto.Mid.Domain\AbySalto.Mid.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

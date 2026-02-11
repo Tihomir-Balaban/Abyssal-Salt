@@ -21,6 +21,8 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString));
 
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IBasketRepository, BasketRepository>();
+
         return services;
     }
 

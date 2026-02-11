@@ -20,6 +20,29 @@ namespace AbySalto.Mid
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
 
+            builder.Services
+                .AddAuthentication()
+                .AddJwtBearer(options =>
+                {
+                    var key = builder.Configuration["Jwt:Key"]!;
+                    var issuer = builder.Configuration["Jwt:Issuer"];
+                    var audience = builder.Configuration["Jwt:Audience"];
+
+                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(key)),
+                        ValidateIssuer = !string.IsNullOrWhiteSpace(issuer),
+                        ValidIssuer = issuer,
+                        ValidateAudience = !string.IsNullOrWhiteSpace(audience),
+                        ValidAudience = audience,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.FromMinutes(2)
+                    };
+                });
+
+            builder.Services.AddAuthorization();
+            
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -35,6 +58,7 @@ namespace AbySalto.Mid
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

@@ -1,6 +1,7 @@
 ﻿using AbySalto.Mid.Application.Contracts;
 using AbySalto.Mid.Infrastructure.Persistence;
 using AbySalto.Mid.Infrastructure.Repositories;
+using AbySalto.Mid.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,8 +21,14 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        // Repositories
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IBasketRepository, BasketRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        
+        // Services
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<ITokenService, TokenService>();
 
         return services;
     }

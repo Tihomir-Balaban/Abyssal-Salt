@@ -1,4 +1,5 @@
 ﻿using AbySalto.Mid.Application.Contracts;
+using AbySalto.Mid.Infrastructure.ExternalProducts;
 using AbySalto.Mid.Infrastructure.Persistence;
 using AbySalto.Mid.Infrastructure.Repositories;
 using AbySalto.Mid.Infrastructure.Security;
@@ -20,6 +21,8 @@ public static class DependencyInjection
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
+        
+        services.AddScoped<IExternalProductClient, DummyJsonProductClient>();
 
         // Repositories
         services.AddScoped<IProductRepository, ProductRepository>();
@@ -30,6 +33,12 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenService, TokenService>();
 
+        // Clients
+        services.AddHttpClient<IExternalProductClient, DummyJsonProductClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://dummyjson.com/");
+        });
+        
         return services;
     }
 

@@ -19,8 +19,4 @@
     <ProjectReference Include="..\AbySalto.Mid.Domain\AbySalto.Mid.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-
-  </ItemGroup>
-
 </Project>

@@ -20,6 +20,24 @@ namespace AbySalto.Mid
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
 
+            builder.Services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.TokenValidationParameters = new()
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+                        )
+                    };
+                });
+            
             builder.Services
                 .AddAuthentication()
                 .AddJwtBearer(options =>

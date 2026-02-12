@@ -28,6 +28,9 @@ namespace AbySalto.Mid
                 .AddJwtBearer(options =>
                 {
                     var key = builder.Configuration["Jwt:Key"];
+                    var issuer = builder.Configuration["Jwt:Issuer"];
+                    var audience = builder.Configuration["Jwt:Audience"];
+                    
                     if (string.IsNullOrWhiteSpace(key))
                         throw new InvalidOperationException("Missing JWT configuration: Jwt:Key");
 
@@ -36,9 +39,9 @@ namespace AbySalto.Mid
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
                         ValidateIssuer = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidIssuer = issuer,
                         ValidateAudience = true,
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        ValidAudience = audience,
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.FromMinutes(1)
                     };

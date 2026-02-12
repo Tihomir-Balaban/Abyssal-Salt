@@ -20,6 +20,12 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
             entity.HasKey(x => x.Id);
 
+            entity.Property(x => x.ExternalId);
+
+            entity.HasIndex(x => x.ExternalId)
+                .IsUnique()
+                .HasFilter("[ExternalId] IS NOT NULL");
+            
             entity.Property(x => x.Name)
                 .HasMaxLength(200)
                 .IsRequired();

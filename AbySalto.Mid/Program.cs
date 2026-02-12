@@ -1,8 +1,11 @@
+using System.Text;
 using AbySalto.Mid.Application;
 using AbySalto.Mid.Infrastructure;
 using AbySalto.Mid.Domain.Entities;
 using AbySalto.Mid.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AbySalto.Mid
 {
@@ -20,45 +23,27 @@ namespace AbySalto.Mid
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
 
-            builder.Services.AddAuthentication("Bearer")
-                .AddJwtBearer("Bearer", options =>
+            builder.Services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
                 {
-                    options.TokenValidationParameters = new()
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
+                    var key = builder.Configuration["Jwt:Key"];
+                    if (string.IsNullOrWhiteSpace(key))
+                        throw new InvalidOperationException("Missing JWT configuration: Jwt:Key");
 
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+                        ValidateIssuer = true,
                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidateAudience = true,
                         ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
-                        )
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.FromMinutes(1)
                     };
                 });
             
-            builder.Services
-                .AddAuthentication()
-                .AddJwtBearer(options =>
-                {
-                    var key = builder.Configuration["Jwt:Key"]!;
-                    var issuer = builder.Configuration["Jwt:Issuer"];
-                    var audience = builder.Configuration["Jwt:Audience"];
-
-                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(key)),
-                        ValidateIssuer = !string.IsNullOrWhiteSpace(issuer),
-                        ValidIssuer = issuer,
-                        ValidateAudience = !string.IsNullOrWhiteSpace(audience),
-                        ValidAudience = audience,
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.FromMinutes(2)
-                    };
-                });
-
             builder.Services.AddAuthorization();
             
             var app = builder.Build();

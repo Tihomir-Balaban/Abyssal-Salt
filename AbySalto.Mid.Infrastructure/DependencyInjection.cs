@@ -6,6 +6,9 @@ using AbySalto.Mid.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using AbySalto.Mid.Application.Services;
+using AbySalto.Mid.Infrastructure.ExternalProducts;
+
 
 namespace AbySalto.Mid.Infrastructure;
 

@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using AbySalto.Mid.Application.Contracts;
+using AbySalto.Mid.Application.Contracts.Records;
 
 namespace AbySalto.Mid.Infrastructure.ExternalProducts;
 

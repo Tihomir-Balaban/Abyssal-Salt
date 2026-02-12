@@ -1,4 +1,6 @@
-﻿namespace AbySalto.Mid.Application.Contracts;
+﻿using AbySalto.Mid.Application.Contracts.Records;
+
+namespace AbySalto.Mid.Application.Contracts;
 
 public interface IExternalProductClient
 {

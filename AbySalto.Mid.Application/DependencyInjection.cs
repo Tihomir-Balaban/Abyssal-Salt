@@ -12,7 +12,10 @@ public static class DependencyInjection
         services.AddScoped<ProductQueries>();
         services.AddScoped<AuthService>();
         services.AddScoped<BasketService>();
+        services.AddScoped<OrderService>();
         services.AddScoped<ProductImportService>();
+        services.AddScoped<FavoriteService>();
         return services;
+
     }
 }

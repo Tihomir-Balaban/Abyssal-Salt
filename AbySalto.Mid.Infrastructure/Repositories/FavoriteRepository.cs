@@ -7,6 +7,16 @@ namespace AbySalto.Mid.Infrastructure.Repositories;
 
 public sealed class FavoriteRepository(AppDbContext db) : IFavoriteRepository
 {
+    public async Task<IReadOnlyList<Favorite>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        return await db.Favorites
+            .AsNoTracking()
+            .Include(x => x.Product)
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<bool> ExistsAsync(Guid userId, Guid productId, CancellationToken cancellationToken)
     {
         return db.Favorites.AnyAsync(

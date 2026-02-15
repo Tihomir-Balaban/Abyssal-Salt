@@ -4,6 +4,8 @@ namespace AbySalto.Mid.Application.Contracts;
 
 public interface IFavoriteRepository
 {
+    Task<IReadOnlyList<Favorite>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
+    
     Task<bool> ExistsAsync(Guid userId, Guid productId, CancellationToken cancellationToken);
 
     Task AddAsync(Favorite favorite, CancellationToken cancellationToken);

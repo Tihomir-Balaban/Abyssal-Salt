@@ -27,12 +27,8 @@ public sealed class FavoriteService(
     }
 
     public Task RemoveAsync(Guid userId, Guid productId, CancellationToken cancellationToken)
-    {
-        return favoriteRepository.RemoveAsync(userId, productId, cancellationToken);
-    }
+        => favoriteRepository.RemoveAsync(userId, productId, cancellationToken);
 
     public Task<IReadOnlyList<Product>> GetAsync(Guid userId, CancellationToken cancellationToken)
-    {
-        return favoriteRepository.GetProductsAsync(userId, cancellationToken);
-    }
+        => favoriteRepository.GetProductsAsync(userId, cancellationToken);
 }

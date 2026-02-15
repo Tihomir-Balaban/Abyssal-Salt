@@ -3,62 +3,82 @@ using AbySalto.Mid.Application.Contracts;
 using AbySalto.Mid.Application.Products;
 using AbySalto.Mid.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AbySalto.Mid.Application.Requests.Products;
 
-public sealed class ProductQueries(IProductRepository repository)
+public sealed class ProductQueries(IProductRepository repository, IMemoryCache cache)
 {
-    public async Task<PagedResult<ProductDto>> GetPagedAsync(GetProductsRequest request, CancellationToken cancellationToken)
+    public Task<PagedResult<ProductDto>> GetPagedAsync(GetProductsRequest request, CancellationToken cancellationToken)
     {
-        var page = request.Page < 1 ? 1 : request.Page;
-        var pageSize = request.PageSize < 1 ? 10 : request.PageSize;
-        pageSize = pageSize > 100 ? 100 : pageSize;
+        var page = request.Page <= 0 ? 1 : request.Page;
+        var pageSize = request.PageSize <= 0 ? 10 : request.PageSize;
 
-        var query = repository.Query();
+        var search = request.Search?.Trim() ?? string.Empty;
+        var sortBy = request.SortBy?.Trim() ?? "name";
+        var sortDirection = request.SortDirection?.Trim() ?? "asc";
 
-        if (!string.IsNullOrWhiteSpace(request.Search))
+        var cacheKey =
+            $"products:p={page}:ps={pageSize}:s={search.ToLowerInvariant()}:sb={sortBy.ToLowerInvariant()}:sd={sortDirection.ToLowerInvariant()}";
+
+        return cache.GetOrCreateAsync(cacheKey, async entry =>
         {
-            var search = request.Search.Trim();
-            query = query.Where(q => q.Name.Contains(search));
-        }
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2);
+            entry.SlidingExpiration = TimeSpan.FromSeconds(30);
 
-        query = ApplySorting(query, request.SortBy, request.SortDirection);
+            var query = repository.Query();
 
-        var totalCount = await query.CountAsync(cancellationToken);
-        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
-
-        var items = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(product => new ProductDto
+            if (!string.IsNullOrWhiteSpace(search))
             {
-                Id = product.Id,
-                Name = product.Name,
-                Price = product.Price,
-                Description = product.Description
-            })
-            .ToListAsync(cancellationToken);
+                query = query.Where(q => q.Name.Contains(search));
+            }
 
-        return new PagedResult<ProductDto>(
-            page: page,
-            pageSize: pageSize,
-            totalCount: totalCount,
-            totalPages: totalPages,
-            items: items);
+            query = ApplySorting(query, sortBy, sortDirection);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+            var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(product => new ProductDto
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Price = product.Price,
+                    Description = product.Description
+                })
+                .ToListAsync(cancellationToken);
+
+            return new PagedResult<ProductDto>(
+                page: page,
+                pageSize: pageSize,
+                totalCount: totalCount,
+                totalPages: totalPages,
+                items: items);
+        })!;
     }
 
-    public async Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        var product = await repository.GetByIdAsync(id, cancellationToken);
+        var cacheKey = $"product:{id:D}";
 
-        if (product is null)
-            return null;
+        return cache.GetOrCreateAsync(cacheKey, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+            entry.SlidingExpiration = TimeSpan.FromMinutes(1);
 
-        return new ProductDto(
-            id: product.Id,
-            name: product.Name,
-            price: product.Price,
-            description: product.Description);
+            var product = await repository.GetByIdAsync(id, cancellationToken);
+
+            if (product is null)
+                return null;
+
+            return new ProductDto(
+                id: product.Id,
+                name: product.Name,
+                price: product.Price,
+                description: product.Description);
+        });
     }
 
     private static IQueryable<Product> ApplySorting(

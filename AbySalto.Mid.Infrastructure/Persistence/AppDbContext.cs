@@ -9,6 +9,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<User> Users => Set<User>();
     public DbSet<Basket> Baskets => Set<Basket>();
     public DbSet<BasketItem> BasketItems => Set<BasketItem>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<Favorite> Favorites => Set<Favorite>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -92,5 +95,70 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
                 .IsRequired();
         });
 
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.ToTable("Orders");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.UserId);
+
+            entity.Property(x => x.CreatedAtUtc)
+                .IsRequired();
+
+            entity.Property(x => x.Total)
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
+
+            entity.HasMany(x => x.Items)
+                .WithOne(x => x.Order)
+                .HasForeignKey(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(x => x.UserId);
+        });
+
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.ToTable("OrderItems");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.ProductId)
+                .IsRequired();
+
+            entity.Property(x => x.ProductName)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            entity.Property(x => x.UnitPrice)
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
+
+            entity.Property(x => x.Quantity)
+                .IsRequired();
+
+            entity.HasIndex(x => x.OrderId);
+        });
+        
+        modelBuilder.Entity<Favorite>(entity =>
+        {
+            entity.ToTable("Favorites");
+
+            entity.HasKey(x => new { x.UserId, x.ProductId });
+
+            entity.Property(x => x.CreatedAtUtc)
+                .IsRequired();
+
+            entity.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne<Product>()
+                .WithMany()
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }

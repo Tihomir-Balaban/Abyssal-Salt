@@ -145,17 +145,18 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         {
             entity.ToTable("Favorites");
 
-            entity.HasKey(x => new { x.UserId, x.ProductId });
+            entity.HasKey(x => x.Id);
 
-            entity.Property(x => x.CreatedAtUtc)
+            entity.Property(x => x.UserId)
                 .IsRequired();
 
-            entity.HasOne<User>()
-                .WithMany()
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(x => x.ProductId)
+                .IsRequired();
 
-            entity.HasOne<Product>()
+            entity.HasIndex(x => new { x.UserId, x.ProductId })
+                .IsUnique();
+
+            entity.HasOne(x => x.Product)
                 .WithMany()
                 .HasForeignKey(x => x.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);

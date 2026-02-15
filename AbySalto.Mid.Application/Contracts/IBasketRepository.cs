@@ -5,6 +5,7 @@ namespace AbySalto.Mid.Application.Contracts;
 public interface IBasketRepository
 {
     Task<Domain.Entities.Basket?> GetByIdAsync(Guid basketId, CancellationToken cancellationToken);
+    Task<Domain.Entities.Basket?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
     Task AddAsync(Domain.Entities.Basket basket, CancellationToken cancellationToken);
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

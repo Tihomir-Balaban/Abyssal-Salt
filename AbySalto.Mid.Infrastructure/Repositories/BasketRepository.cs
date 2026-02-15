@@ -17,6 +17,12 @@ public sealed class BasketRepository(AppDbContext db) : IBasketRepository
             .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(b => b.Id == basketId, cancellationToken);
 
+    public Task<Basket?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        => db.Baskets
+            .Include(b => b.Items)
+            .ThenInclude(i => i.Product)
+            .FirstOrDefaultAsync(b => b.UserId == userId, cancellationToken);
+
     public Task AddAsync(Basket basket, CancellationToken cancellationToken)
         => db.Baskets.AddAsync(basket, cancellationToken).AsTask();
 

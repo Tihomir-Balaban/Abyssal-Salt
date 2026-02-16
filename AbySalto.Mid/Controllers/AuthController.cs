@@ -11,14 +11,14 @@ public sealed class AuthController(AuthService auth) : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
-        var (ok, error) = await auth.RegisterAsync(request.Email, request.Password, cancellationToken);
-        return ok ? NoContent() : BadRequest(new { error });
+        await auth.RegisterAsync(request.Email, request.Password, cancellationToken);
+        return NoContent();
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        var (ok, token, error) = await auth.LoginAsync(request.Email, request.Password, cancellationToken);
-        return ok ? Ok(new { token }) : Unauthorized(new { error });
+        var token = await auth.LoginAsync(request.Email, request.Password, cancellationToken);
+        return Ok(new { token });
     }
 }

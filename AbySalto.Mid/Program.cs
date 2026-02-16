@@ -3,6 +3,7 @@ using AbySalto.Mid.Application;
 using AbySalto.Mid.Infrastructure;
 using AbySalto.Mid.Domain.Entities;
 using AbySalto.Mid.Infrastructure.Persistence;
+using AbySalto.Mid.WebApi.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -51,6 +52,8 @@ namespace AbySalto.Mid
             
             var app = builder.Build();
 
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+            
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();

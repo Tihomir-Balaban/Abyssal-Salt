@@ -1,4 +1,5 @@
-﻿using AbySalto.Mid.Application.Contracts;
+﻿using AbySalto.Mid.Application.Common.Exceptions;
+using AbySalto.Mid.Application.Contracts;
 using AbySalto.Mid.Domain.Entities;
 
 namespace AbySalto.Mid.Application.Services;
@@ -8,13 +9,19 @@ public sealed class AuthService(
     IPasswordHasher hasher,
     ITokenService tokens)
 {
-    public async Task<(bool ok, string? error)> RegisterAsync(string email, string password, CancellationToken cancellationToken)
+    public async Task RegisterAsync(string email, string password, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(email))
+            throw new AppException("Email is required.", statusCode: 400, errorCode: "email_required");
+
+        if (string.IsNullOrWhiteSpace(password))
+            throw new AppException("Password is required.", statusCode: 400, errorCode: "password_required");
+        
         email = email.Trim().ToLowerInvariant();
 
         var existing = await users.GetByEmailAsync(email, cancellationToken);
         if (existing is not null)
-            return (false, "Email already exists.");
+            throw new AppException("Email already exists.", statusCode: 409, errorCode: "email_exists");
 
         hasher.CreateHash(password, out var hash, out var salt);
 
@@ -29,23 +36,29 @@ public sealed class AuthService(
 
         await users.AddAsync(user, cancellationToken);
         await users.SaveChangesAsync(cancellationToken);
-
-        return (true, null);
     }
 
-    public async Task<(bool ok, string? token, string? error)> LoginAsync(string email, string password, CancellationToken cancellationToken)
+    public async Task<string> LoginAsync(
+        string email,
+        string password,
+        CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(email))
+            throw new AppException("Email is required.", 400, "email_required");
+
+        if (string.IsNullOrWhiteSpace(password))
+            throw new AppException("Password is required.", 400, "password_required");
+        
         email = email.Trim().ToLowerInvariant();
 
         var user = await users.GetByEmailAsync(email, cancellationToken);
         if (user is null)
-            return (false, null, "Invalid credentials.");
+            throw new AppException("Invalid credentials.", 401, "invalid_credentials");
 
         var valid = hasher.Verify(password, user.PasswordHash, user.PasswordSalt);
         if (!valid)
-            return (false, null, "Invalid credentials.");
+            throw new AppException("Invalid credentials.", 401, "invalid_credentials");
 
-        var token = tokens.CreateAccessToken(user.Id, user.Email);
-        return (true, token, null);
+        return tokens.CreateAccessToken(user.Id, user.Email);
     }
 }

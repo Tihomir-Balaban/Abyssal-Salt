@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbySalto.Mid.Domain", "AbyS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbySalto.Mid.Application", "AbySalto.Mid.Application\AbySalto.Mid.Application.csproj", "{8A1A6302-33F1-4B75-A828-8BABBC2CA429}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbySalto.Mid.Tests", "AbySalto.Mid.Tests\AbySalto.Mid.Tests.csproj", "{1A1A2A87-9010-46A8-9646-314EBC6E7B4E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{8A1A6302-33F1-4B75-A828-8BABBC2CA429}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A1A6302-33F1-4B75-A828-8BABBC2CA429}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A1A6302-33F1-4B75-A828-8BABBC2CA429}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A1A2A87-9010-46A8-9646-314EBC6E7B4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A1A2A87-9010-46A8-9646-314EBC6E7B4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A1A2A87-9010-46A8-9646-314EBC6E7B4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A1A2A87-9010-46A8-9646-314EBC6E7B4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

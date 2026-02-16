@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AbySalto.Mid.Application.Services;
 using AbySalto.Mid.Infrastructure.ExternalProducts;
+using Microsoft.Extensions.Caching.Memory;
 
 
 namespace AbySalto.Mid.Infrastructure;
@@ -25,7 +26,18 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
         
-        services.AddScoped<IExternalProductClient, DummyJsonProductClient>();
+        services.AddMemoryCache();
+        
+        // Clients
+        services.AddHttpClient<DummyJsonProductClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://dummyjson.com/");
+        });
+
+        services.AddScoped<IExternalProductClient>(sp =>
+            new CachedExternalProductClient(
+                sp.GetRequiredService<DummyJsonProductClient>(),
+                sp.GetRequiredService<IMemoryCache>()));
 
         // Repositories
         services.AddScoped<IProductRepository, ProductRepository>();
@@ -38,11 +50,6 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenService, TokenService>();
 
-        // Clients
-        services.AddHttpClient<IExternalProductClient, DummyJsonProductClient>(client =>
-        {
-            client.BaseAddress = new Uri("https://dummyjson.com/");
-        });
         
         return services;
     }

@@ -4,7 +4,10 @@ using AbySalto.Mid.Infrastructure;
 using AbySalto.Mid.Domain.Entities;
 using AbySalto.Mid.Infrastructure.Persistence;
 using AbySalto.Mid.WebApi.Middleware;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -21,7 +24,31 @@ namespace AbySalto.Mid
                 .AddApplication()
                 .AddInfrastructure(builder.Configuration);
 
-            builder.Services.AddControllers();
+            builder.Services
+                .AddControllers()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.InvalidModelStateResponseFactory = context =>
+                    {
+                        var problem = new ValidationProblemDetails(context.ModelState)
+                        {
+                            Status = StatusCodes.Status400BadRequest,
+                            Title = "Validation failed",
+                            Instance = context.HttpContext.Request.Path
+                        };
+
+                        problem.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+
+                        return new BadRequestObjectResult(problem)
+                        {
+                            ContentTypes = { "application/problem+json" }
+                        };
+                    };
+                });
+
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+            
             builder.Services.AddOpenApi();
 
             builder.Services

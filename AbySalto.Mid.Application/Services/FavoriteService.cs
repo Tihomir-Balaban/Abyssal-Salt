@@ -1,5 +1,7 @@
-﻿using AbySalto.Mid.Application.Contracts;
+﻿using AbySalto.Mid.Application.Common.Exceptions;
+using AbySalto.Mid.Application.Contracts;
 using AbySalto.Mid.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace AbySalto.Mid.Application.Services;
 
@@ -11,11 +13,12 @@ public sealed class FavoriteService(
     {
         var exists = await favoriteRepository.ExistsAsync(userId, productId, cancellationToken);
         if (exists)
-            throw new InvalidOperationException("Already favorited.");
+            throw new AppException("Already favorited.", StatusCodes.Status409Conflict, "favorite_exists");
 
         var product = await productRepository.GetByIdAsync(productId, cancellationToken);
         if (product is null)
-            throw new InvalidOperationException("Product not found.");
+            throw new AppException("Product not found.", StatusCodes.Status404NotFound, "product_not_found");
+
 
         var favorite = new Favorite
         {
@@ -30,7 +33,8 @@ public sealed class FavoriteService(
     {
         var exists = await favoriteRepository.ExistsAsync(userId, productId, cancellationToken);
         if (!exists)
-            throw new InvalidOperationException("Favorite not found.");
+            throw new AppException("Favorite not found.", StatusCodes.Status404NotFound, "favorite_not_found");
+
 
         await favoriteRepository.RemoveAsync(userId, productId, cancellationToken);
     }

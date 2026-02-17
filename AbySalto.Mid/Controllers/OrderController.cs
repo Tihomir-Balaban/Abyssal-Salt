@@ -8,6 +8,8 @@ namespace Abysalto.Mid.Controller;
 [ApiController]
 [Route("api/orders")]
 [Authorize]
+[Produces("application/json")]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
 public sealed class OrderController(OrderService service) : ControllerBase
 {
     [HttpPost]
@@ -72,5 +74,28 @@ public sealed class OrderController(OrderService service) : ControllerBase
             }),
             Total = order.Items.Sum(x => x.UnitPrice * x.Quantity)
         });
+    }
+    
+    [HttpPost("{basketId:guid}/checkout")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Checkout(Guid basketId, CancellationToken cancellationToken)
+    {
+        // If you implemented IUserContext / claims extraction:
+        Guid? userId = null;
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var sub = User.FindFirst("sub")?.Value;
+            if (Guid.TryParse(sub, out var parsed))
+                userId = parsed;
+        }
+
+        var order = await service.CheckoutAsync(basketId, userId, cancellationToken);
+
+        return Ok(order);
     }
 }

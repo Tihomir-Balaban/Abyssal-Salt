@@ -12,6 +12,8 @@ namespace Abysalto.Mid.Controller;
 [ApiController]
 [Authorize]
 [Route("api/[controller]")]
+[Produces("application/json")]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
 public sealed class BasketController(BasketService service) : ControllerBase
 {
     [HttpPost("me")]
@@ -25,6 +27,9 @@ public sealed class BasketController(BasketService service) : ControllerBase
     }
 
     [HttpGet("{basketId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Get(Guid basketId, CancellationToken cancellationToken)
     {
         var basket = await service.GetAsync(basketId, cancellationToken);
@@ -32,6 +37,10 @@ public sealed class BasketController(BasketService service) : ControllerBase
     }
 
     [HttpPost("{basketId:guid}/items")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> AddItem(
         Guid basketId,
         [FromBody] AddItemRequest request,

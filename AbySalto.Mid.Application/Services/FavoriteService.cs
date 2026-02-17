@@ -11,7 +11,7 @@ public sealed class FavoriteService(
     {
         var exists = await favoriteRepository.ExistsAsync(userId, productId, cancellationToken);
         if (exists)
-            return;
+            throw new InvalidOperationException("Already favorited.");
 
         var product = await productRepository.GetByIdAsync(productId, cancellationToken);
         if (product is null)
@@ -26,8 +26,14 @@ public sealed class FavoriteService(
         await favoriteRepository.AddAsync(favorite, cancellationToken);
     }
 
-    public Task RemoveAsync(Guid userId, Guid productId, CancellationToken cancellationToken)
-        => favoriteRepository.RemoveAsync(userId, productId, cancellationToken);
+    public async Task RemoveAsync(Guid userId, Guid productId, CancellationToken cancellationToken)
+    {
+        var exists = await favoriteRepository.ExistsAsync(userId, productId, cancellationToken);
+        if (!exists)
+            throw new InvalidOperationException("Favorite not found.");
+
+        await favoriteRepository.RemoveAsync(userId, productId, cancellationToken);
+    }
 
     public Task<IReadOnlyList<Product>> GetAsync(Guid userId, CancellationToken cancellationToken)
         => favoriteRepository.GetProductsAsync(userId, cancellationToken);
